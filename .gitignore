@@ -1,0 +1,24 @@
+__pycache__/
+.pytest_cache
+*.ipynb_checkpoints
+daghome/
+
+
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+*.egg-info/
+
+.tox/
+.pytest_cache/
+.src_nbs/
