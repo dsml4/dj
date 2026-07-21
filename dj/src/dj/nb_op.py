@@ -1,6 +1,7 @@
 from functools import cached_property
 from types import SimpleNamespace
-from dataclasses import make_dataclass, asdict, dataclass
+from dataclasses import make_dataclass, dataclass, asdict
+import os
 
 
 import dagster as dg
@@ -49,8 +50,11 @@ def standalone_context(
 
 
 class NbOp:
-    def create_catalog(self, names: list[str], run_id: str):
-        root_path = f"s3://backet/path/{run_id}/"
+    def create_catalog(self, names: list[str], run_id: str) -> StorageCatalog:
+        # Dagster local storage default path
+        root_path = (
+            f"{os.getenv('DAGSTER_HOME')}/storage/{self.context.job_name}/{run_id}"
+        )
         paths = [root_path + out_name for out_name in names]
         return make_storage_catalog(names=names, paths=paths)
 
@@ -91,6 +95,12 @@ class NbOp:
                 names=self._op_params["ins"], run_id=self.context.run_id
             )
         return None
+
+    @property
+    def run_id(self) -> str:
+        if hasattr(self.context, "standalone_run_id"):
+            return getattr(self.context, "standalone_run_id")
+        return self.context.run_id
 
     @cached_property
     def outs(self) -> StorageCatalog | None:
