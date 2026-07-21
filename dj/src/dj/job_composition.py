@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Sequence, Any
 from types import MappingProxyType
 from functools import cached_property
-import shutil
+import os
 
 from dagster import OpDefinition, MetadataValue, Config
 from dagster._core.definitions.composition import PendingNodeInvocation
@@ -35,19 +35,25 @@ class _JobInsOutsComposition:
 
 
 class NbsJobComposition:
-    def __init__(self, root_path: Path, nbs_sequence: list[str]):
+    def __init__(
+        self,
+        root_path: Path,
+        nbs_sequence: list[str],
+        dagstermill_nb_path: Path | None = None,
+    ):
         self._def_op_kvargs_seq: list[dict[str, Any]] = []
         self._job_metadata = {}
-        self._src_nbs_path = root_path / ".src_nbs"
-        if self._src_nbs_path.exists():
-            shutil.rmtree(str(self._src_nbs_path))
-        self._src_nbs_path.mkdir(parents=True, exist_ok=True)
+        if not dagstermill_nb_path:
+            self._dagstermill_nb_path = Path(os.getenv("DAGSTER_HOME", "."))
+        self._dagstermill_nb_path = self._dagstermill_nb_path / "dagstermill_nbs"
+        self._dagstermill_nb_path.mkdir(parents=True, exist_ok=True)
 
         for relative_nb_path in nbs_sequence:
             absolute_nb_path = root_path.joinpath(root_path, relative_nb_path)
             self._def_op_kvargs_seq.append(
                 define_dagstermill_op_kvargs_from_nb(
-                    nb_path=absolute_nb_path, tmp_src_nbs_path=self._src_nbs_path
+                    nb_path=absolute_nb_path,
+                    dagstermill_nb_path=self._dagstermill_nb_path,
                 )
             )
 

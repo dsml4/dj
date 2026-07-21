@@ -51,7 +51,7 @@ def create_nb_op_from_cell_source(
 
 def define_dagstermill_op_kvargs_from_nb(
     nb_path: Path,
-    tmp_src_nbs_path: Path,
+    dagstermill_nb_path: Path,
 ) -> dict[str, Any]:
     """
     create kvargs for define_dagstermill_op:
@@ -94,7 +94,7 @@ def define_dagstermill_op_kvargs_from_nb(
     if kvargs is None:
         raise TypeError("kvargs is None")
 
-    notebook_path_arg = str(tmp_src_nbs_path / nb_path.name)
+    notebook_path_arg = str(dagstermill_nb_path / nb_path.name)
     kvargs["notebook_path"] = notebook_path_arg
 
     if isinstance(kvargs, dict):
