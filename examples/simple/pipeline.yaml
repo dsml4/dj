@@ -1,0 +1,8 @@
+
+notebooks:
+  path: /home/jovyan/work/dj/examples/simple/notebooks
+  exc_nbs_path: /home/jovyan/work/daghome/exe_nbs
+  notebooks:
+    - nb_0.ipynb
+    - nb_1.ipynb
+    - nb_2.ipynb
