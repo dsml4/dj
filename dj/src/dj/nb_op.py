@@ -40,12 +40,13 @@ class MissedInsParameters(Exception):
 
 def standalone_context(
     op_config: dg.Config | None = None,
-    run_id: str | None = None,
+    ins_run_id: str | None = None,
     job_name: str = "standalone",
     nb_name: str = "",
 ) -> DagstermillExecutionContext:
     dagstermill_context = dagstermill.get_context(op_config)
-    setattr(dagstermill_context, "standalone_run_id", run_id)
+    if isinstance(ins_run_id, str):
+        setattr(dagstermill_context, "ins_run_id", ins_run_id)
     return dagstermill_context
 
 
@@ -53,7 +54,7 @@ class NbOp:
     def create_catalog(self, names: list[str], run_id: str) -> StorageCatalog:
         # Dagster local storage default path
         root_path = (
-            f"{os.getenv('DAGSTER_HOME')}/storage/{self.context.job_name}/{run_id}"
+            f"{os.getenv('DAGSTER_HOME')}/storage/{self.context.job_name}/{run_id}/"
         )
         paths = [root_path + out_name for out_name in names]
         return make_storage_catalog(names=names, paths=paths)
@@ -92,14 +93,18 @@ class NbOp:
     def ins(self) -> StorageCatalog | None:
         if "ins" in self._op_params:
             return self.create_catalog(
-                names=self._op_params["ins"], run_id=self.context.run_id
+                names=self._op_params["ins"], run_id=self.ins_run_id
             )
         return None
 
     @property
     def run_id(self) -> str:
-        if hasattr(self.context, "standalone_run_id"):
-            return getattr(self.context, "standalone_run_id")
+        return self.context.run_id
+
+    @property
+    def ins_run_id(self) -> str:
+        if hasattr(self.context, "ins_run_id"):
+            return getattr(self.context, "ins_run_id")
         return self.context.run_id
 
     @cached_property
